@@ -3,6 +3,7 @@ using System;
 using DeliveryApp.Infraestrutura.Compartilhado.Orm;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DeliveryApp.Infraestrutura.Compartilhado.Orm.Migrations
 {
     [DbContext(typeof(DeliveryAppDbContext))]
-    partial class DeliveryAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260903173926_Add_TBEstabelecimentos")]
+    partial class Add_TBEstabelecimentos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
