@@ -2,9 +2,20 @@ namespace DeliveryApp.Dominio.Compartilhado;
 
 public interface IRepositorio<T> where T : EntidadeBase<T>
 {
-    void Cadastrar(T entidade);
-    bool Editar(Guid idSelecionado, T entidadeAtualizada);
-    bool Excluir(Guid idSelecionado);
-    T? SelecionarPorId(Guid idSelecionado);
-    List<T> SelecionarTodos();
+    Task CadastrarAsync(T entidade, CancellationToken cancellationToken = default);
+
+    Task<bool> EditarAsync(
+        Guid idSelecionado,
+        T entidadeAtualizada,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<bool> ExcluirAsync(Guid idSelecionado, CancellationToken cancellationToken = default);
+
+    Task<T?> SelecionarPorIdAsync(
+        Guid idSelecionado,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<List<T>> SelecionarTodosAsync(CancellationToken cancellationToken = default);
 }
