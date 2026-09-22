@@ -22,7 +22,8 @@ public sealed class ItemPedido
         string nomeProduto,
         int quantidade,
         decimal precoUnitario,
-        string? observacao
+        string? observacao,
+        IEnumerable<ComplementoItemPedido> complementos
     )
     {
         Id = Guid.CreateVersion7();
@@ -30,7 +31,8 @@ public sealed class ItemPedido
         NomeProduto = nomeProduto.Trim();
         Quantidade = quantidade;
         PrecoUnitario = precoUnitario;
-        ValorTotal = quantidade * (precoUnitario + Complementos.Sum(c => c.PrecoAdicional));
         Observacao = string.IsNullOrWhiteSpace(observacao) ? null : observacao.Trim();
+        Complementos = complementos.ToList();
+        ValorTotal = quantidade * (precoUnitario + Complementos.Sum(c => c.PrecoAdicional));
     }
 }

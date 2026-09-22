@@ -102,4 +102,19 @@ public sealed class RepositorioProdutoEmOrm(
 
         return true;
     }
+
+    public async Task<IReadOnlyList<Produto>> ObterParaPedidoAsync(
+        Guid estabelecimentoId,
+        IEnumerable<Guid> produtosIds,
+        CancellationToken cancellationToken
+    )
+    {
+        Guid[] guidProdutosIds = produtosIds.Distinct().ToArray();
+
+        return await registros
+            .Include(p => p.Complementos)
+            .Where(p => p.EstabelecimentoId == estabelecimentoId &&
+                p.Ativo && guidProdutosIds.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

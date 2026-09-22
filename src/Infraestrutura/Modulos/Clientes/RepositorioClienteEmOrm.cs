@@ -8,6 +8,11 @@ public sealed class RepositorioClienteEmOrm(
     DeliveryAppDbContext dbContext
 ) : RepositorioBaseEmOrm<Cliente>(dbContext), IRepositorioCliente
 {
+    public async Task<bool> ExistePorIdAsync(Guid clienteId, CancellationToken cancellationToken)
+    {
+        return await registros.AnyAsync(r => r.Id == clienteId, cancellationToken);
+    }
+
     public async Task<bool> ExisteRegistroComCpfAsync(
         string cpf,
         CancellationToken cancellationToken = default

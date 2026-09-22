@@ -33,4 +33,10 @@ public interface IRepositorioProduto : IRepositorio<Produto>
         bool ativo,
         CancellationToken cancellationToken = default
     );
+
+    Task<IReadOnlyList<Produto>> ObterParaPedidoAsync(
+        Guid estabelecimentoId,
+        IEnumerable<Guid> produtosIds,
+        CancellationToken cancellationToken
+    );
 }

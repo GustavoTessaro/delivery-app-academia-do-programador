@@ -41,4 +41,15 @@ public sealed class RepositorioEstabelecimentoEmOrm(
 
         return true;
     }
+
+    public async Task<Estabelecimento?> SelecionarParaPedidoAsync(
+        Guid estabelecimentoId,
+        CancellationToken cancellationToken
+    )
+    {
+        return await registros.SingleOrDefaultAsync(
+            e => e.Id == estabelecimentoId,
+            cancellationToken
+        );
+    }
 }

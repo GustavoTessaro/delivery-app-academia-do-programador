@@ -94,4 +94,15 @@ public sealed class Estabelecimento : EntidadeBase<Estabelecimento>
     {
         return new string(valor.Where(char.IsDigit).ToArray());
     }
+
+    public bool EstaDisponivel(TimeOnly horaDeAgora)
+    {
+        if (!Ativo)
+            return false;
+
+        if (HorarioAbertura < HorarioFechamento)
+            return horaDeAgora >= HorarioAbertura && horaDeAgora < HorarioFechamento;
+
+        return horaDeAgora >= HorarioAbertura || horaDeAgora < HorarioFechamento;
+    }
 }
