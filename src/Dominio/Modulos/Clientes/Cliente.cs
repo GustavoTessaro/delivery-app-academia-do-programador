@@ -7,6 +7,17 @@ public sealed class Cliente : EntidadeBase<Cliente>
     public string Nome { get; private set; } = string.Empty;
     public string Cpf { get; private set; } = string.Empty;
 
+    private Cliente()
+    {
+    }
+
+    public Cliente(Guid id, string nome, string cpf)
+    {
+        Id = id;
+        Nome = nome;
+        Cpf = cpf;
+    }
+
     public override IReadOnlyList<ErroValidacao> Validar()
     {
         List<ErroValidacao> erros = [];

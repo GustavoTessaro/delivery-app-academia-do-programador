@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Options;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
 
 namespace DeliveryApp.WebApi.Compartilhado.Logging;
