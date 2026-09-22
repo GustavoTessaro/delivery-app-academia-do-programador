@@ -5,6 +5,7 @@ using DeliveryApp.Dominio.Compartilhado.Auth;
 using DeliveryApp.Dominio.Modulos.Cardapio;
 using DeliveryApp.Dominio.Modulos.Clientes;
 using DeliveryApp.Dominio.Modulos.Estabelecimentos;
+using DeliveryApp.Dominio.Modulos.Pedidos;
 
 namespace DeliveryApp.Infraestrutura.Compartilhado.Orm;
 
@@ -21,6 +22,7 @@ public sealed class DeliveryAppDbContext(
     public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<Produto> Produtos => Set<Produto>();
     public DbSet<Complemento> Complementos => Set<Complemento>();
+    public DbSet<Pedido> Pedidos => Set<Pedido>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
