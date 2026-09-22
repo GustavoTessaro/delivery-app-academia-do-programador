@@ -1,3 +1,4 @@
+using DeliveryApp.Dominio.Compartilhado.Auth;
 using DeliveryApp.Dominio.Modulos.Pedidos;
 
 namespace DeliveryApp.Aplicacao.Modulos.Pedidos.DTOs;
@@ -20,6 +21,14 @@ public sealed record ItemPedidoDto(
     IReadOnlyList<ComplementoItemPedidoDto> Complementos
 );
 
+public sealed record TransicaoStatusPedidoDto(
+    StatusPedido? StatusAnterior,
+    StatusPedido StatusAtual,
+    TipoUsuario TipoUsuario,
+    string? Motivo,
+    DateTimeOffset OcorridaEmUtc
+);
+
 public sealed record PedidoDto(
     Guid Id,
     Guid ClienteId,
@@ -31,7 +40,8 @@ public sealed record PedidoDto(
     decimal Total,
     DateTimeOffset CriadoEmUtc,
     DateTimeOffset AtualizadoEmUtc,
-    IReadOnlyList<ItemPedidoDto> Itens
+    IReadOnlyList<ItemPedidoDto> Itens,
+    IReadOnlyList<TransicaoStatusPedidoDto> Historico
 )
 {
     public static PedidoDto Criar(Pedido pedido)
@@ -68,7 +78,19 @@ public sealed record PedidoDto(
                             c.PrecoAdicional
                         ))
                         .ToList()
-                )).ToList()
+                )).ToList(),
+
+            pedido.Historico
+                .OrderBy(t => t.OcorridaEmUtc)
+                .ThenBy(t => t.Id)
+                .Select(t => new TransicaoStatusPedidoDto(
+                    t.StatusAnterior,
+                    t.StatusAtual,
+                    t.TipoUsuario,
+                    t.Motivo,
+                    t.OcorridaEmUtc
+                ))
+                .ToList()
         );
     }
 };

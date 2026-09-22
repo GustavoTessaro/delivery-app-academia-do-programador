@@ -54,7 +54,8 @@ public sealed class RepositorioPedidoEmOrm(DeliveryAppDbContext dbContext) : IRe
         return dbContext.Pedidos
             .AsSplitQuery()
             .Include(p => p.Itens)
-                .ThenInclude(i => i.Complementos);
+                .ThenInclude(i => i.Complementos)
+            .Include(p => p.Historico);
     }
 
     private IQueryable<Pedido> FiltrarPorUsuario(

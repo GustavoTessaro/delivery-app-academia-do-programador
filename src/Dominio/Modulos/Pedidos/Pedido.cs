@@ -1,4 +1,5 @@
 using DeliveryApp.Dominio.Compartilhado;
+using DeliveryApp.Dominio.Compartilhado.Auth;
 
 namespace DeliveryApp.Dominio.Modulos.Pedidos;
 
@@ -21,6 +22,7 @@ public sealed class Pedido : EntidadeBase<Pedido>
     public uint Versao { get; private set; }
 
     public List<ItemPedido> Itens { get; private set; } = [];
+    public List<TransicaoStatusPedido> Historico { get; private set; } = [];
 
     public Pedido(
         Guid id,
@@ -45,6 +47,115 @@ public sealed class Pedido : EntidadeBase<Pedido>
         Status = StatusPedido.AguardandoAceite;
         CriadoEmUtc = criadoEmUtc;
         AtualizadoEmUtc = criadoEmUtc;
+
+        Historico = [new TransicaoStatusPedido(
+            clienteId,
+            TipoUsuario.Cliente,
+            null,
+            StatusPedido.AguardandoAceite,
+            null,
+            criadoEmUtc
+        )];
+    }
+
+    public bool TentarObterNovoStatus(
+        AcaoPedido acao,
+        TipoUsuario tipoUsuario,
+        out StatusPedido novoStatus,
+        out string? erro
+    )
+    {
+        switch (acao)
+        {
+            case AcaoPedido.Aceitar:
+                novoStatus = StatusPedido.EmPreparo;
+                break;
+
+            case AcaoPedido.Recusar:
+                novoStatus = StatusPedido.Recusado;
+                break;
+
+            case AcaoPedido.Cancelar:
+                novoStatus = StatusPedido.Cancelado;
+                break;
+
+            case AcaoPedido.IniciarEntrega:
+                novoStatus = StatusPedido.EmEntrega;
+                break;
+
+            case AcaoPedido.Concluir:
+                novoStatus = StatusPedido.Concluido;
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(acao));
+        }
+
+        bool transicaoPermitida;
+
+        switch (Status, novoStatus)
+        {
+            case (StatusPedido.AguardandoAceite, StatusPedido.EmPreparo):
+            case (StatusPedido.AguardandoAceite, StatusPedido.Recusado):
+            case (StatusPedido.EmPreparo, StatusPedido.EmEntrega):
+            case (StatusPedido.EmEntrega, StatusPedido.Concluido):
+                transicaoPermitida = tipoUsuario == TipoUsuario.Estabelecimento;
+                break;
+
+            case (StatusPedido.AguardandoAceite, StatusPedido.Cancelado):
+                transicaoPermitida = tipoUsuario == TipoUsuario.Cliente;
+                break;
+
+            default:
+                transicaoPermitida = false;
+                break;
+        }
+
+        if (!transicaoPermitida)
+        {
+            erro = $"A transição de {Status} para {novoStatus} não é permitida para {tipoUsuario}.";
+            return false;
+        }
+
+        erro = null;
+        return true;
+    }
+
+    public bool TentarAlterarStatus(
+        AcaoPedido acao,
+        Guid usuarioId,
+        TipoUsuario tipoUsuario,
+        string? motivo,
+        DateTimeOffset ocorridaEmUtc,
+        out string? erro
+    )
+    {
+        if (motivo?.Trim().Length > TransicaoStatusPedido.TamanhoMaximoMotivo)
+        {
+            erro = $"O motivo deve possuir no máximo {TransicaoStatusPedido.TamanhoMaximoMotivo} caracteres.";
+            return false;
+        }
+
+        if (!TentarObterNovoStatus(acao, tipoUsuario, out StatusPedido novoStatus, out erro))
+            return false;
+
+        StatusPedido statusAnterior = Status;
+        Status = novoStatus;
+
+        AtualizadoEmUtc = ocorridaEmUtc;
+        Versao++;
+
+        Historico.Add(new TransicaoStatusPedido(
+            usuarioId,
+            tipoUsuario,
+            statusAnterior,
+            Status,
+            motivo,
+            AtualizadoEmUtc
+        ));
+
+        erro = null;
+        return true;
     }
 
     public override IReadOnlyList<ErroValidacao> Validar()

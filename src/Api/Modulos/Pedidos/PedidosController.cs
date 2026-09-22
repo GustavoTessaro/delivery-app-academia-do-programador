@@ -12,11 +12,12 @@ namespace DeliveryApp.WebApi.Modulos.Pedidos;
 
 [ApiController]
 [Route("api/pedidos")]
+[Authorize(Roles = nameof(TipoUsuario.Cliente) + "," + nameof(TipoUsuario.Estabelecimento))]
 public sealed class PedidosController(IMediator mediator) : ControllerBase
 {
     [Authorize(Roles = nameof(TipoUsuario.Cliente))]
     [HttpPost]
-    [ProducesResponseType<CriarPedidoResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<CriarPedidoResponse>(StatusCodes.Status202Accepted)]
     public async Task<ActionResult<CriarPedidoResponse>> Criar(
         CriarPedidoRequest request,
         CancellationToken cancellationToken
@@ -39,10 +40,92 @@ public sealed class PedidosController(IMediator mediator) : ControllerBase
         if (resultado.IsFailed)
             return this.ProblemDetails(resultado);
 
-        return CreatedAtAction(
+        return AcceptedAtAction(
             nameof(ObterPorId),
             new { pedidoId = resultado.Value },
             new CriarPedidoResponse(resultado.Value)
+        );
+    }
+
+    [Authorize(Roles = nameof(TipoUsuario.Estabelecimento))]
+    [HttpPatch("{pedidoId:guid}/aceite")]
+    public async Task<ActionResult<AlterarStatusPedidoResponse>> Aceitar(
+        Guid pedidoId,
+        CancellationToken cancellationToken
+    )
+    {
+        return await AlterarStatus(
+            pedidoId,
+            TipoUsuario.Estabelecimento,
+            AcaoPedido.Aceitar,
+            null,
+            cancellationToken
+        );
+    }
+
+    [Authorize(Roles = nameof(TipoUsuario.Estabelecimento))]
+    [HttpPatch("{pedidoId:guid}/recusa")]
+    public async Task<ActionResult<AlterarStatusPedidoResponse>> Recusar(
+        Guid pedidoId,
+        MotivoPedidoRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        return await AlterarStatus(
+            pedidoId,
+            TipoUsuario.Estabelecimento,
+            AcaoPedido.Recusar,
+            request.Motivo,
+            cancellationToken
+        );
+    }
+
+    [Authorize(Roles = nameof(TipoUsuario.Cliente))]
+    [HttpPatch("{pedidoId:guid}/cancelamento")]
+    public async Task<ActionResult<AlterarStatusPedidoResponse>> Cancelar(
+        Guid pedidoId,
+        MotivoPedidoRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        return await AlterarStatus(
+            pedidoId,
+            TipoUsuario.Cliente,
+            AcaoPedido.Cancelar,
+            request.Motivo,
+            cancellationToken
+        );
+    }
+
+    [Authorize(Roles = nameof(TipoUsuario.Estabelecimento))]
+    [HttpPatch("{pedidoId:guid}/inicio-entrega")]
+    public async Task<ActionResult<AlterarStatusPedidoResponse>> IniciarEntrega(
+        Guid pedidoId,
+        CancellationToken cancellationToken
+    )
+    {
+        return await AlterarStatus(
+            pedidoId,
+            TipoUsuario.Estabelecimento,
+            AcaoPedido.IniciarEntrega,
+            null,
+            cancellationToken
+        );
+    }
+
+    [Authorize(Roles = nameof(TipoUsuario.Estabelecimento))]
+    [HttpPatch("{pedidoId:guid}/conclusao")]
+    public async Task<ActionResult<AlterarStatusPedidoResponse>> Concluir(
+        Guid pedidoId,
+        CancellationToken cancellationToken
+    )
+    {
+        return await AlterarStatus(
+            pedidoId,
+            TipoUsuario.Estabelecimento,
+            AcaoPedido.Concluir,
+            null,
+            cancellationToken
         );
     }
 
@@ -83,6 +166,31 @@ public sealed class PedidosController(IMediator mediator) : ControllerBase
             return this.ProblemDetails(resultado);
 
         return Ok(resultado.Value.Select(ParaResponse).ToList());
+    }
+
+    private async Task<ActionResult<AlterarStatusPedidoResponse>> AlterarStatus(
+        Guid pedidoId,
+        TipoUsuario tipoUsuario,
+        AcaoPedido acao,
+        string? motivo,
+        CancellationToken cancellationToken
+    )
+    {
+        var resultado = await mediator.Send(new AlterarStatusPedidoCommand(
+            pedidoId,
+            tipoUsuario,
+            acao,
+            motivo
+        ), cancellationToken);
+
+        if (resultado.IsFailed)
+            return this.ProblemDetails(resultado);
+
+        return AcceptedAtAction(
+            nameof(ObterPorId),
+            new { pedidoId = resultado.Value },
+            new AlterarStatusPedidoResponse(resultado.Value, acao)
+        );
     }
 
     private static PedidoResponse ParaResponse(PedidoDto pedido)

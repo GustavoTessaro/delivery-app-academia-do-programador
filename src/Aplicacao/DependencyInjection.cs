@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddMassTransit(config =>
         {
             config.AddConsumer<CriarPedidoConsumer>();
+            config.AddConsumer<AlterarStatusPedidoConsumer>();
 
             config.UsingRabbitMq((context, rabbitMq) =>
             {
@@ -32,8 +33,15 @@ public static class DependencyInjection
                 {
                     endpoint.PrefetchCount = 4;
                     endpoint.ConcurrentMessageLimit = 2;
+                    endpoint.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
 
                     endpoint.ConfigureConsumer<CriarPedidoConsumer>(context);
+                });
+
+                rabbitMq.ReceiveEndpoint("pedidos-atualizados", endpoint =>
+                {
+                    endpoint.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
+                    endpoint.ConfigureConsumer<AlterarStatusPedidoConsumer>(context);
                 });
             });
         });

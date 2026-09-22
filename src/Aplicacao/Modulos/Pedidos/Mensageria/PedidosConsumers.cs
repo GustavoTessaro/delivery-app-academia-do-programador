@@ -1,3 +1,4 @@
+using DeliveryApp.Dominio.Compartilhado.Auth;
 using DeliveryApp.Dominio.Modulos.Cardapio;
 using DeliveryApp.Dominio.Modulos.Clientes;
 using DeliveryApp.Dominio.Modulos.Estabelecimentos;
@@ -132,5 +133,84 @@ public sealed class CriarPedidoConsumer(
         }
 
         await repositorioPedido.CadastrarAsync(pedido, context.CancellationToken);
+    }
+}
+
+public sealed class AlterarStatusPedidoConsumer(
+    IRepositorioPedido repositorioPedido,
+    IRepositorioEstabelecimento repositorioEstabelecimento,
+    ILogger<AlterarStatusPedidoConsumer> logger
+) : IConsumer<AlterarStatusPedidoMessage>
+{
+    public async Task Consume(ConsumeContext<AlterarStatusPedidoMessage> context)
+    {
+        AlterarStatusPedidoMessage mensagem = context.Message;
+
+        var pedido = await repositorioPedido.ObterParaProcessamentoAsync(
+            mensagem.PedidoId,
+            context.CancellationToken
+        );
+
+        if (pedido is null)
+            throw new InvalidOperationException(
+                $"O pedido {mensagem.PedidoId} ainda não está disponível."
+            );
+
+        if (pedido.Versao != mensagem.VersaoEsperada)
+        {
+            logger.LogInformation(
+                "A alteração do pedido {PedidoId} já foi processada.",
+                mensagem.PedidoId
+            );
+
+            return;
+        }
+
+        bool vinculadoAoUsuario;
+
+        switch (mensagem.TipoUsuario)
+        {
+            case TipoUsuario.Cliente:
+                vinculadoAoUsuario = pedido.ClienteId == mensagem.UsuarioId;
+                break;
+
+            case TipoUsuario.Estabelecimento:
+                vinculadoAoUsuario = (await repositorioEstabelecimento.SelecionarParaPedidoAsync(
+                    pedido.EstabelecimentoId,
+                    context.CancellationToken
+                ))?.Id == mensagem.UsuarioId;
+                break;
+
+            default:
+                vinculadoAoUsuario = false;
+                break;
+        }
+
+        if (!vinculadoAoUsuario)
+        {
+            logger.LogInformation("O pedido {PedidoId} não está vinculado ao usuário.", mensagem.PedidoId);
+            return;
+        }
+
+        var conseguiuAlterar = pedido.TentarAlterarStatus(
+            mensagem.Acao,
+            mensagem.UsuarioId,
+            mensagem.TipoUsuario,
+            mensagem.Motivo,
+            mensagem.SolicitadaEmUtc,
+            out string? erro
+        );
+
+        if (!conseguiuAlterar)
+        {
+            logger.LogInformation(
+                "O pedido {PedidoId} não pode ser alterado: {Erro}.",
+                mensagem.PedidoId,
+                erro!
+            );
+            return;
+        }
+
+        await repositorioPedido.SalvarAsync(context.CancellationToken);
     }
 }
