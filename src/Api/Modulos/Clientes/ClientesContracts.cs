@@ -14,3 +14,5 @@ public sealed record AutenticacaoClienteResponse(
     string AccessToken,
     DateTime DataExpiracaoEmUtc
 );
+
+public sealed record ClienteResponse(Guid Id, string Nome, string Cpf, string Email);

@@ -20,7 +20,7 @@ public abstract class RepositorioBaseEmOrm<T>(DeliveryAppDbContext dbContext) wh
         CancellationToken cancellationToken = default
     )
     {
-        T? registroSelecionado = await SelecionarPorId(id);
+        T? registroSelecionado = await SelecionarPorIdAsync(id, cancellationToken);
 
         if (registroSelecionado == null)
             return false;
@@ -32,9 +32,9 @@ public abstract class RepositorioBaseEmOrm<T>(DeliveryAppDbContext dbContext) wh
         return true;
     }
 
-    public async Task<bool> Excluir(Guid id, CancellationToken cancellationToken = default)
+    public async Task<bool> ExcluirAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        T? TSelecionado = await SelecionarPorId(id);
+        T? TSelecionado = await SelecionarPorIdAsync(id, cancellationToken);
 
         if (TSelecionado == null)
             return false;
@@ -46,12 +46,12 @@ public abstract class RepositorioBaseEmOrm<T>(DeliveryAppDbContext dbContext) wh
         return true;
     }
 
-    public virtual async Task<T?> SelecionarPorId(Guid idSelecionado)
+    public virtual async Task<T?> SelecionarPorIdAsync(Guid idSelecionado, CancellationToken cancellationToken = default)
     {
         return await registros.SingleOrDefaultAsync(c => c.Id == idSelecionado);
     }
 
-    public virtual async Task<List<T>> SelecionarTodosAsync()
+    public virtual async Task<List<T>> SelecionarTodosAsync(CancellationToken cancellationToken = default)
     {
         return await registros.ToListAsync();
     }

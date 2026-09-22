@@ -13,6 +13,28 @@ public static class ResultExtensions
         var tipoErro = (TipoErro)result.Errors.First().Metadata[nameof(TipoErro)];
         var mensagemErro = result.Errors.First().Message;
 
+        if (tipoErro.Equals(TipoErro.NaoAutenticado))
+        {
+            return CriarProblem(
+                controller,
+                StatusCodes.Status401Unauthorized,
+                mensagemErro,
+                "Não Autenticado",
+                ProblemDetailsTypes.Unauthorized
+            );
+        }
+
+        if (tipoErro.Equals(TipoErro.NaoAutorizado))
+        {
+            return CriarProblem(
+                controller,
+                StatusCodes.Status403Forbidden,
+                mensagemErro,
+                "Acesso Negado",
+                ProblemDetailsTypes.Forbidden
+            );
+        }
+
         if (tipoErro.Equals(TipoErro.NaoEncontrado))
         {
             return CriarProblem(

@@ -1,3 +1,5 @@
+using DeliveryApp.Dominio.Modulos.Clientes;
+using DeliveryApp.Infraestrutura.Modulos.Clientes;
 using DeliveryApp.Infraestrutura.Orm;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +15,8 @@ public static class DependencyInjection
         IConfiguration configuration
     )
     {
+        services.AddScoped<IRepositorioCliente, RepositorioClienteEmOrm>();
+
         services.AddDataProtection();
         services.AddIdentityCore<IdentityUser<Guid>>(options =>
         {

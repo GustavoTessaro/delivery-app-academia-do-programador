@@ -7,15 +7,13 @@ public sealed class Cliente : EntidadeBase<Cliente>
     public string Nome { get; private set; } = string.Empty;
     public string Cpf { get; private set; } = string.Empty;
 
-    private Cliente()
-    {
-    }
+    private Cliente() { }
 
     public Cliente(Guid id, string nome, string cpf)
     {
         Id = id;
-        Nome = nome;
-        Cpf = cpf;
+        Nome = nome.Trim();
+        Cpf = NormalizarCpf(cpf);
     }
 
     public override IReadOnlyList<ErroValidacao> Validar()
@@ -47,7 +45,7 @@ public sealed class Cliente : EntidadeBase<Cliente>
         Cpf = NormalizarCpf(entidadeAtualizada.Cpf);
     }
 
-    private static string NormalizarCpf(string cpf) // 00023501232
+    private static string NormalizarCpf(string cpf)
     {
         return new string(cpf
             .Where(c => c is not '.' and not '-' && !char.IsWhiteSpace(c))
