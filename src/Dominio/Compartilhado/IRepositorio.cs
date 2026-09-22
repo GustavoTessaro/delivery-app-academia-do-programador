@@ -1,5 +1,10 @@
 namespace DeliveryApp.Dominio.Compartilhado;
 
+public sealed class ConflitoDePersistenciaException(
+    string mensagem,
+    Exception innerException
+) : Exception(mensagem, innerException);
+
 public interface IRepositorio<T> where T : EntidadeBase<T>
 {
     Task CadastrarAsync(T entidade, CancellationToken cancellationToken = default);

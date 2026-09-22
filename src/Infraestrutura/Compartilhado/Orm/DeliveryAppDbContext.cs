@@ -4,14 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using DeliveryApp.Dominio.Compartilhado.Auth;
 using DeliveryApp.Dominio.Modulos.Clientes;
 
-namespace DeliveryApp.Infraestrutura.Orm;
+namespace DeliveryApp.Infraestrutura.Compartilhado.Orm;
 
 public sealed class DeliveryAppDbContext(
     DbContextOptions<DeliveryAppDbContext> options,
     IProvedorDeUsuario? provedorDeUsuario = null
 ) : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Guid>, Guid>(options)
 {
-
     private static readonly Guid TipoUsuarioClienteId = new("01a058f4-a048-79a3-b1a6-0f01d629a126");
 
     public DbSet<Cliente> Clientes => Set<Cliente>();

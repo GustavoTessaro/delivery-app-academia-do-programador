@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace DeliveryApp.Infraestrutura.Orm.Migrations
+namespace DeliveryApp.Infraestrutura.Compartilhado.Orm.Migrations
 {
     /// <inheritdoc />
     public partial class Seed_ClienteRole : Migration

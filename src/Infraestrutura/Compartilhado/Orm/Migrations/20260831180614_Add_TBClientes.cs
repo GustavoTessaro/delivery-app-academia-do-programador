@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace DeliveryApp.Infraestrutura.Orm.Migrations;
+namespace DeliveryApp.Infraestrutura.Compartilhado.Orm.Migrations;
 
 /// <inheritdoc />
 public partial class Add_TBClientes : Migration

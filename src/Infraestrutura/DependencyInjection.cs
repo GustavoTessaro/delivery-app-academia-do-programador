@@ -1,8 +1,8 @@
 using DeliveryApp.Dominio.Compartilhado.Auth;
 using DeliveryApp.Dominio.Modulos.Clientes;
-using DeliveryApp.Infraestrutura.Auth;
+using DeliveryApp.Infraestrutura.Compartilhado.Auth;
+using DeliveryApp.Infraestrutura.Compartilhado.Orm;
 using DeliveryApp.Infraestrutura.Modulos.Clientes;
-using DeliveryApp.Infraestrutura.Orm;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,9 +35,7 @@ public static class DependencyInjection
             options.Lockout.AllowedForNewUsers = true;
         })
         .AddRoles<IdentityRole<Guid>>()
-        .AddEntityFrameworkStores<DeliveryAppDbContext>()
-        .AddSignInManager()
-        .AddDefaultTokenProviders();
+        .AddEntityFrameworkStores<DeliveryAppDbContext>();
 
         services.AddDbContext<DeliveryAppDbContext>(options =>
         {

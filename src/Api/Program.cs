@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text.Json.Serialization;
 using DeliveryApp.Aplicacao;
 using DeliveryApp.Infraestrutura;
-using DeliveryApp.Infraestrutura.Orm;
+using DeliveryApp.Infraestrutura.Compartilhado.Orm;
 using DeliveryApp.WebApi.Compartilhado.Auth;
 using DeliveryApp.WebApi.Compartilhado.Http;
 using DeliveryApp.WebApi.Compartilhado.Logging;

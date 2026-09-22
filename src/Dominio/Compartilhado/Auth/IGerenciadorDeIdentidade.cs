@@ -10,16 +10,20 @@ public sealed class ValidacaoDeIdentidadeException(
 
 public sealed class ConflitoDeIdentidadeException(string mensagem) : Exception(mensagem);
 
-public sealed record UsuarioCadastrado(Guid Id, string Email);
+public sealed record UsuarioDto(Guid Id, string Email);
 
 public interface IGerenciadorDeIdentidade
 {
-    Task<UsuarioCadastrado> CadastrarAsync(
+    Task<UsuarioDto> CadastrarAsync(
         Guid usuarioId,
         string email,
         string senha,
         TipoUsuario tipo
     );
-
+    Task<UsuarioDto?> ChecarValidadeDeSenhaAsync(
+        string email,
+        string senha,
+        TipoUsuario tipo
+    );
     Task ExcluirAsync(Guid usuarioId);
 }

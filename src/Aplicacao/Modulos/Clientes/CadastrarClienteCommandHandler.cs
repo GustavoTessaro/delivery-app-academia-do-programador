@@ -1,5 +1,4 @@
-using System.Data.Common;
-using DeliveryApp.Aplicacao.Compartilhado;
+using DeliveryApp.Aplicacao.Modulos.Clientes.Util;
 using DeliveryApp.Dominio.Compartilhado;
 using DeliveryApp.Dominio.Compartilhado.Auth;
 using DeliveryApp.Dominio.Modulos.Clientes;
@@ -34,28 +33,14 @@ public sealed class CadastrarClienteCommandHandler(
         var erros = cliente.Validar();
 
         if (erros.Count > 0)
-        {
-            var resultado = Result.Ok();
+            return Result.Fail(ErrosDeCliente.Validacao(erros));
 
-            foreach (ErroValidacao erro in erros)
-                resultado.WithError(TipoErro.Validacao.ObterMetadados(erro.Campo, erro.Mensagem));
-
-            return resultado;
-        }
-
-        var clientes = await repositorioCliente.SelecionarTodosAsync(cancellationToken);
-
-        if (clientes.Any(registro => registro.Cpf == cliente.Cpf))
-        {
-            return Result.Fail(
-                new Error("Um cliente com este CPF já foi cadastrado.")
-                    .WithMetadata(nameof(TipoErro), TipoErro.Conflito)
-            );
-        }
+        if (await repositorioCliente.ExisteRegistroComCpfAsync(cliente.Cpf, cancellationToken))
+            return Result.Fail(ErrosDeCliente.CpfDuplicado());
 
         try
         {
-            UsuarioCadastrado usuario = await gerenciadorDeIdentidade.CadastrarAsync(
+            UsuarioDto usuario = await gerenciadorDeIdentidade.CadastrarAsync(
                 cliente.Id,
                 command.Email,
                 command.Senha,
@@ -66,15 +51,15 @@ public sealed class CadastrarClienteCommandHandler(
 
             return Result.Ok(cliente.Id);
         }
-        catch (ValidacaoDeIdentidadeException excecao)
+        catch (ValidacaoDeIdentidadeException ex)
         {
-            return Result.Fail(ErrosDeCliente.ValidacaoDeIdentidade(excecao.Campo, excecao.Message));
+            return Result.Fail(ErrosDeCliente.ValidacaoDeIdentidade(ex.Campo, ex.Message));
         }
-        catch (ConflitoDeIdentidadeException excecao)
+        catch (ConflitoDeIdentidadeException ex)
         {
-            return Result.Fail(ErrosDeCliente.ConflitoDeIdentidade(excecao.Message));
+            return Result.Fail(ErrosDeCliente.ConflitoDeIdentidade(ex.Message));
         }
-        catch (DbException)
+        catch (ConflitoDePersistenciaException)
         {
             await gerenciadorDeIdentidade.ExcluirAsync(cliente.Id);
 

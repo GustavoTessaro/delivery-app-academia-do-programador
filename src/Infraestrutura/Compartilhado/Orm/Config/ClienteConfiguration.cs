@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DeliveryApp.Infraestrutura.Orm.Config;
+namespace DeliveryApp.Infraestrutura.Compartilhado.Orm.Config;
 
 public sealed class ClienteConfiguration : IEntityTypeConfiguration<Cliente>
 {

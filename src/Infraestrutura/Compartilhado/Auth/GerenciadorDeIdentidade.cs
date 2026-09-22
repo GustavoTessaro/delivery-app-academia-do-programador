@@ -1,13 +1,13 @@
 using DeliveryApp.Dominio.Compartilhado.Auth;
 using Microsoft.AspNetCore.Identity;
 
-namespace DeliveryApp.Infraestrutura.Auth;
+namespace DeliveryApp.Infraestrutura.Compartilhado.Auth;
 
 public sealed class GerenciadorDeIdentidade(
     UserManager<IdentityUser<Guid>> userManager
 ) : IGerenciadorDeIdentidade
 {
-    public async Task<UsuarioCadastrado> CadastrarAsync(
+    public async Task<UsuarioDto> CadastrarAsync(
         Guid usuarioId,
         string email,
         string senha,
@@ -31,10 +31,38 @@ public sealed class GerenciadorDeIdentidade(
         if (!resultadoPapel.Succeeded)
         {
             await userManager.DeleteAsync(usuario);
+
             throw CriarErro(resultadoPapel);
         }
 
-        return new UsuarioCadastrado(usuario.Id, usuario.Email);
+        return new UsuarioDto(usuario.Id, usuario.Email);
+    }
+
+    public async Task<UsuarioDto?> ChecarValidadeDeSenhaAsync(
+        string email,
+        string senha,
+        TipoUsuario tipo
+    )
+    {
+        var usuario = await userManager.FindByEmailAsync(email);
+
+        if (usuario is null || await userManager.IsLockedOutAsync(usuario))
+            return null;
+
+        if (!await userManager.CheckPasswordAsync(usuario, senha))
+        {
+            await userManager.AccessFailedAsync(usuario);
+
+            return null;
+        }
+
+        if (!await userManager.IsInRoleAsync(usuario, tipo.ToString()))
+            return null;
+
+        if (usuario.AccessFailedCount > 0)
+            await userManager.ResetAccessFailedCountAsync(usuario);
+
+        return new UsuarioDto(usuario.Id, usuario.Email!);
     }
 
     public async Task ExcluirAsync(Guid usuarioId)

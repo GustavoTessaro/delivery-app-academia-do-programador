@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace DeliveryApp.WebApi.Compartilhado.Http;
 
-public static class ResultExtensions
+public static class ControllerBaseExtensions
 {
     public static ActionResult ProblemDetails(this ControllerBase controller, ResultBase result)
     {

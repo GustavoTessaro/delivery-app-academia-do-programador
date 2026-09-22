@@ -1,5 +1,5 @@
-using DeliveryApp.Aplicacao.Compartilhado;
 using DeliveryApp.Aplicacao.Modulos.Clientes.DTOs;
+using DeliveryApp.Aplicacao.Modulos.Clientes.Util;
 using DeliveryApp.Dominio.Compartilhado.Auth;
 using DeliveryApp.Dominio.Modulos.Clientes;
 using FluentResults;
@@ -20,22 +20,15 @@ public sealed class ObterClientePorIdQueryHandler(
     )
     {
         if (query.ClienteId != provedorDeUsuario.Id)
-        {
-            return Result.Fail<ClienteDto>(
-                new Error("Um cliente pode acessar apenas suas próprias informações.")
-                    .WithMetadata(nameof(TipoErro), TipoErro.NaoAutorizado)
-            );
-        }
+            return Result.Fail(ErrosDeCliente.NaoAutorizado(provedorDeUsuario.Id!.Value));
 
-        var cliente = await repositorioCliente.SelecionarPorIdAsync(query.ClienteId, cancellationToken);
+        var cliente = await repositorioCliente.SelecionarPorIdAsync(
+            query.ClienteId,
+            cancellationToken
+        );
 
         if (cliente is null)
-        {
-            return Result.Fail<ClienteDto>(
-                new Error("O cliente com este ID não foi encontrado.")
-                    .WithMetadata(nameof(TipoErro), TipoErro.NaoEncontrado)
-            );
-        }
+            return Result.Fail(ErrosDeCliente.NaoEncontrado(query.ClienteId));
 
         return Result.Ok(new ClienteDto(
             cliente.Id,
