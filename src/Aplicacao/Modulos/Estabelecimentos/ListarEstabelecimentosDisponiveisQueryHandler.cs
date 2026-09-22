@@ -40,6 +40,7 @@ public sealed class ListarEstabelecimentosDisponiveisQueryHandler(
             estabelecimento.AreaAtendimento,
             estabelecimento.HorarioAbertura,
             estabelecimento.HorarioFechamento,
+            estabelecimento.TaxaEntrega,
             estabelecimento.Ativo
         );
     }

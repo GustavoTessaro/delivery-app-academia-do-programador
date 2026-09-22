@@ -9,5 +9,6 @@ public sealed record EstabelecimentoDto(
     string AreaAtendimento,
     TimeOnly HorarioAbertura,
     TimeOnly HorarioFechamento,
+    decimal TaxaEntrega,
     bool Ativo
 );

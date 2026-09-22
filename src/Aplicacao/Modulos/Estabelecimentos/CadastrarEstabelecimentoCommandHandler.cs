@@ -15,6 +15,7 @@ public sealed record CadastrarEstabelecimentoCommand(
     string AreaAtendimento,
     TimeOnly HorarioAbertura,
     TimeOnly HorarioFechamento,
+    decimal TaxaEntrega,
     string Email,
     string Senha
 ) : IRequest<Result<Guid>>;
@@ -37,7 +38,8 @@ public sealed class CadastrarEstabelecimentoCommandHandler(
             command.Telefone,
             command.AreaAtendimento,
             command.HorarioAbertura,
-            command.HorarioFechamento
+            command.HorarioFechamento,
+            command.TaxaEntrega
         );
 
         var erros = estabelecimento.Validar();

@@ -15,7 +15,8 @@ public sealed record EditarEstabelecimentoCommand(
     string Telefone,
     string AreaAtendimento,
     TimeOnly HorarioAbertura,
-    TimeOnly HorarioFechamento
+    TimeOnly HorarioFechamento,
+    decimal TaxaEntrega
 ) : IRequest<Result>;
 
 public sealed class EditarEstabelecimentoCommandHandler(
@@ -39,7 +40,8 @@ public sealed class EditarEstabelecimentoCommandHandler(
             command.Telefone,
             command.AreaAtendimento,
             command.HorarioAbertura,
-            command.HorarioFechamento
+            command.HorarioFechamento,
+            command.TaxaEntrega
         );
         var erros = estabelecimentoAtualizado.Validar();
 

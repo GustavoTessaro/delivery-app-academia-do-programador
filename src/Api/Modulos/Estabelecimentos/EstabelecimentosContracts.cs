@@ -8,6 +8,7 @@ public sealed record CadastrarEstabelecimentoRequest(
     string AreaAtendimento,
     TimeOnly HorarioAbertura,
     TimeOnly HorarioFechamento,
+    decimal TaxaEntrega,
     string Email,
     string Senha
 );
@@ -26,6 +27,7 @@ public sealed record EstabelecimentoResponse(
     string AreaAtendimento,
     TimeOnly HorarioAbertura,
     TimeOnly HorarioFechamento,
+    decimal TaxaEntrega,
     bool Ativo
 );
 
@@ -36,7 +38,8 @@ public sealed record EditarEstabelecimentoRequest(
     string Telefone,
     string AreaAtendimento,
     TimeOnly HorarioAbertura,
-    TimeOnly HorarioFechamento
+    TimeOnly HorarioFechamento,
+    decimal TaxaEntrega
 );
 
 public sealed record AutenticarEstabelecimentoRequest(string Email, string Senha);
