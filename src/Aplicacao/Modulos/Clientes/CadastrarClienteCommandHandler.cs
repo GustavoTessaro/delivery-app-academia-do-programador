@@ -1,24 +1,32 @@
+using System.Data.Common;
 using DeliveryApp.Aplicacao.Compartilhado;
 using DeliveryApp.Dominio.Compartilhado;
+using DeliveryApp.Dominio.Compartilhado.Auth;
 using DeliveryApp.Dominio.Modulos.Clientes;
 using FluentResults;
 using MediatR;
 
 namespace DeliveryApp.Aplicacao.Modulos.Clientes;
 
-public sealed record CadastrarClienteCommand(Guid Id, string Nome, string Cpf) : IRequest<Result>;
+public sealed record CadastrarClienteCommand(
+    string Nome,
+    string Cpf,
+    string Email,
+    string Senha
+) : IRequest<Result<Guid>>;
 
 public sealed class CadastrarClienteCommandHandler(
-    IRepositorioCliente repositorioCliente
-) : IRequestHandler<CadastrarClienteCommand, Result>
+    IRepositorioCliente repositorioCliente,
+    IGerenciadorDeIdentidade gerenciadorDeIdentidade
+) : IRequestHandler<CadastrarClienteCommand, Result<Guid>>
 {
-    public async Task<Result> Handle(
+    public async Task<Result<Guid>> Handle(
         CadastrarClienteCommand command,
         CancellationToken cancellationToken = default
     )
     {
         var cliente = new Cliente(
-            command.Id,
+            Guid.CreateVersion7(),
             command.Nome,
             command.Cpf
         );
@@ -45,8 +53,32 @@ public sealed class CadastrarClienteCommandHandler(
             );
         }
 
-        await repositorioCliente.CadastrarAsync(cliente, cancellationToken);
+        try
+        {
+            UsuarioCadastrado usuario = await gerenciadorDeIdentidade.CadastrarAsync(
+                cliente.Id,
+                command.Email,
+                command.Senha,
+                TipoUsuario.Cliente
+            );
 
-        return Result.Ok();
+            await repositorioCliente.CadastrarAsync(cliente, cancellationToken);
+
+            return Result.Ok(cliente.Id);
+        }
+        catch (ValidacaoDeIdentidadeException excecao)
+        {
+            return Result.Fail(ErrosDeCliente.ValidacaoDeIdentidade(excecao.Campo, excecao.Message));
+        }
+        catch (ConflitoDeIdentidadeException excecao)
+        {
+            return Result.Fail(ErrosDeCliente.ConflitoDeIdentidade(excecao.Message));
+        }
+        catch (DbException)
+        {
+            await gerenciadorDeIdentidade.ExcluirAsync(cliente.Id);
+
+            return Result.Fail(ErrosDeCliente.CadastroDuplicado());
+        }
     }
 }

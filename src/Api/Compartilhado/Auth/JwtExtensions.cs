@@ -14,7 +14,7 @@ public static class JwtExtensions
     {
         services.AddHttpContextAccessor();
         services.AddScoped<IProvedorDeUsuario, UserProvider>();
-        services.AddSingleton<JwtProvider>();
+        services.AddSingleton<IEmissorDeTokens, JwtProvider>();
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

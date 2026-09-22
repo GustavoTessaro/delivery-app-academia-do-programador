@@ -7,13 +7,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace DeliveryApp.WebApi.Compartilhado.Auth;
 
-public sealed record AccessTokenResponse(string AccessToken, DateTime DataExpiracaoEmUtc);
-
-public sealed class JwtProvider(IOptions<JwtOptions> jwtOptions)
+public sealed class JwtProvider(IOptions<JwtOptions> jwtOptions) : IEmissorDeTokens
 {
     private readonly JwtOptions options = jwtOptions.Value;
 
-    public AccessTokenResponse CriarToken(
+    public AccessToken CriarToken(
         Guid usuarioId,
         string email,
         TipoUsuario tipoUsuario
@@ -42,6 +40,6 @@ public sealed class JwtProvider(IOptions<JwtOptions> jwtOptions)
 
         string accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return new AccessTokenResponse(accessToken, dataExpiracao);
+        return new AccessToken(accessToken, dataExpiracao);
     }
 }
