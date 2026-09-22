@@ -38,4 +38,24 @@ public static class ErrosDeEstabelecimento
             .WithMetadata(nameof(TipoErro), TipoErro.Validacao)
             .WithMetadata("Campo", campo);
     }
+
+    public static Error NaoEncontrado(Guid estabelecimentoId)
+    {
+        return new Error($"Não foi encontrado o estabelecimento {estabelecimentoId}.")
+            .WithMetadata(nameof(TipoErro), TipoErro.NaoEncontrado);
+    }
+
+    public static Error NaoAutorizado(Guid estabelecimentoId)
+    {
+        return new Error(
+                $"O usuário autenticado não pode administrar o estabelecimento {estabelecimentoId}."
+            )
+            .WithMetadata(nameof(TipoErro), TipoErro.NaoAutorizado);
+    }
+
+    public static Error ConflitoDePersistencia()
+    {
+        return new Error("Ocorreu um conflito ao persistir o estabelecimento.")
+            .WithMetadata(nameof(TipoErro), TipoErro.Conflito);
+    }
 }

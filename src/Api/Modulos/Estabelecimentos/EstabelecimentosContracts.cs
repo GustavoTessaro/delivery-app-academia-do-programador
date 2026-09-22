@@ -17,6 +17,28 @@ public sealed record CadastrarEstabelecimentoResponse(
     string NomeComercial
 );
 
+public sealed record EstabelecimentoResponse(
+    Guid Id,
+    string NomeComercial,
+    string Documento,
+    string Endereco,
+    string Telefone,
+    string AreaAtendimento,
+    TimeOnly HorarioAbertura,
+    TimeOnly HorarioFechamento,
+    bool Ativo
+);
+
+public sealed record EditarEstabelecimentoRequest(
+    string NomeComercial,
+    string Documento,
+    string Endereco,
+    string Telefone,
+    string AreaAtendimento,
+    TimeOnly HorarioAbertura,
+    TimeOnly HorarioFechamento
+);
+
 public sealed record AutenticarEstabelecimentoRequest(string Email, string Senha);
 
 public sealed record AutenticarEstabelecimentoResponse(
@@ -24,4 +46,3 @@ public sealed record AutenticarEstabelecimentoResponse(
     string AccessToken,
     DateTime DataExpiracaoEmUtc
 );
-
