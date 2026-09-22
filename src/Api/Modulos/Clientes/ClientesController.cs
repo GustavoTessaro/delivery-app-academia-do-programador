@@ -1,3 +1,4 @@
+using DeliveryApp.Aplicacao.Compartilhado;
 using DeliveryApp.Aplicacao.Modulos.Clientes;
 using DeliveryApp.Dominio.Compartilhado.Auth;
 using DeliveryApp.WebApi.Compartilhado.Http;
